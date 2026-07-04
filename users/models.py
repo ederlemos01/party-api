@@ -4,18 +4,22 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db.models.functions import Lower
 from django.core.validators import RegexValidator
+from django.utils import timezone
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
+    username = models.CharField(max_length=15,unique=True,validators=[RegexValidator(r'^[a-zA-Z0-9_]{3,15}$', 'Username invalido')],)
+    photo = models.ImageField(upload_to='avatars/', blank=True)
+    bio = models.CharField(blank=True, max_length=150)
+    birth_date = models.DateField(blank=True,null=True)
+    is_private = models.BooleanField(default=True)
+    updated_at = models.DateTimeField( auto_now=True)
+    
     objects = UserManager()
-    username = models.CharField(
-        max_length=15,
-        unique=True,
-        validators=[RegexValidator(r'^[a-zA-Z0-9_]{3,15}$', 'Username invalido')],
-    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(Lower('email'), name='user_email_ci_unique'),

@@ -4,13 +4,16 @@ from django.contrib.auth.models import BaseUserManager
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
+    def get_by_natural_key(self, username):
+        return self.get(email=username.strip().lower())
+    
     def _create_user(self, email,username,password,**extra_fields):
         if not email:
             raise ValueError('O email eh obrigatorio')
         if not username: 
             raise ValueError('username eh obrigatorio')
         
-        email = self.normalize_email(email)
+        email = email.strip().lower()
         user = self.model(email=email,username=username, **extra_fields)
         user.set_password(password)                 
         user.save(using=self._db)                   
