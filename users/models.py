@@ -3,13 +3,13 @@ from .managers import UserManager
 import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db.models.functions import Lower
-from django.core.validators import RegexValidator
-from django.utils import timezone
+from .validators import username_validator
+
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=15,unique=True,validators=[RegexValidator(r'^[a-zA-Z0-9_]{3,15}$', 'Username invalido')],)
+    username = models.CharField(max_length=15,unique=True,validators=[username_validator])
     photo = models.ImageField(upload_to='avatars/', blank=True)
     bio = models.CharField(blank=True, max_length=150)
     birth_date = models.DateField(blank=True,null=True)
@@ -28,3 +28,11 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+    def save(self, *args, **kwargs):
+        
+        if self.email:
+            self.email = self.email.strip().lower()
+            
+        super().save(*args, **kwargs)
+        
