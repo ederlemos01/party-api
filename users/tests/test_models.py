@@ -65,15 +65,15 @@ class TestUserManager:
 class TestUserConstraints:
 
     def test_email_unico_case_insensitive_no_banco(self):
-        # Salva direto pelo model (sem passar pelo manager) para preservar
-        # o case e exercitar a UniqueConstraint com Lower('email').
+     
         first = User(email='Teste@Email.com', username='usuario1')
         first.set_password('S3nha-F0rte!2026')
         first.save()
+        User.objects.filter(id=first.id).update(email='Caso@X.com')
 
         with pytest.raises(IntegrityError):
             User.objects.create_user(
-                email='teste@email.com',
+                email='caso@x.com',
                 username='usuario2',
                 password='S3nha-F0rte!2026',
             )

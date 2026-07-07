@@ -29,18 +29,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             ),
         ],
     )
-    
-    
-    
-    
-    
-    
-    
+       
     class Meta:
         model = User
         fields = ['email','username','password']
         extra_kwargs = {'password': {'write_only': True}}
-
 
 
     def validate_password(self, value):
