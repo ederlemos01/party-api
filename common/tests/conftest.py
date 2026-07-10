@@ -8,8 +8,9 @@ from users.models import User
 
 @pytest.fixture
 def criar_usuario(db):
-    """Factory de usuários: owner é OneToOneField, então cada Organization
-    extra criada num teste precisa de um dono diferente."""
+    """Factory de usuários: a constraint unique_active_organization_owner
+    permite uma única org ativa por dono, então cada Organization extra
+    criada num teste precisa de um dono diferente."""
     contador = itertools.count(1)
 
     def _criar(**kwargs):

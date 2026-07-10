@@ -77,7 +77,7 @@ class TestRelacoes:
 class TestUnicidadeCondicional:
     def test_slug_repetido_entre_vivas_falha(self, organization, criar_usuario):
         """Owner distinto: garante que o IntegrityError vem da constraint de
-        slug, e não da unicidade do OneToOneField owner."""
+        slug, e não da unicidade da FK + constraint condicional."""
         with pytest.raises(IntegrityError):
             Organization.objects.create(
                 name='Outra', slug='noite-baixa', owner=criar_usuario()
