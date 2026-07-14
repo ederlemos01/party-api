@@ -46,3 +46,33 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+    
+
+
+
+
+class UserPerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','photo','bio','username']
+        read_only_fields = ['id','photo','bio','username']
+
+
+class UserEditPerfilSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=15,
+        validators=[
+            username_validator,
+            UniqueValidator(
+                queryset=User.objects.all(),
+                lookup='iexact',
+                message='Este username ja esta em uso.',
+            ),
+        ],
+    )
+    
+    
+    class Meta:
+        model = User
+        fields = ['id','photo','bio','username']
+        read_only_fields = ['id']
