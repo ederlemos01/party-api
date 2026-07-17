@@ -5,10 +5,11 @@ from datetime import timedelta
 from django.utils import timezone
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from .validators import validate_slug
-
+import uuid
 class Roles(models.TextChoices):
-    GERENTE = "gerente", "Gerente" 
-    VISUALIZACAO = "visualizacao", "Visualização"
+    OWNER = "owner", "Dono"
+    MANAGER = "manager", "Gerente" 
+    VIEWER = "viewer", "Visualizador"
     CHECKIN = "checkin", "Check-in"
     COORDENADOR_CHECKIN = "coordenador_checkin", "Coordenador de check-in"
 
@@ -21,7 +22,7 @@ class Organization(BaseModel):
     banner = models.ImageField(upload_to='organizations/banners/', blank=True,  max_length=255)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='owned_organizations')
     
-    slug = models.SlugField(validators=[MinLengthValidator(limit_value=2,),validate_slug],)
+    slug = models.SlugField(validators=[MinLengthValidator(limit_value=2,),validate_slug],default=uuid.uuid4)
 
     class Meta(BaseModel.Meta):
         constraints = [

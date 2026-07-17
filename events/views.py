@@ -6,7 +6,7 @@ from django.db import IntegrityError
 
 class CreateEventView(generics.CreateAPIView):
     serializer_class = CreateEventSerializer
-
+    
     def perform_create(self, serializer):
         org= self.request.user.owned_organizations.first()
         try:

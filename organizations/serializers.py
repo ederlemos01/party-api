@@ -18,7 +18,7 @@ class OrganizationFollowSerializer(serializers.ModelSerializer):
         fields = ['user']
 
 
-class OrganizationEditSerializer(serializers.ModelSerializer):
+class OrganizationEditProfileSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(min_length=2,
         validators=[
             UniqueValidator(
@@ -43,6 +43,24 @@ class OrganizationPerfilSerializer(serializers.ModelSerializer):
         model = Organization
         fields = ['id','name','description','photo','banner','slug']
         read_only_fields = ['id','name','description','photo','banner','slug']
+
+class OrganizationCreateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Organization
+        fields = ['id','slug']
+        read_only_fields = ['id','slug']
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        
+        if request.user.owned_organizations.exists():
+            raise serializers.ValidationError({
+                "organization": "voce ja possui uma organizacao"
+            })
+        
+        return super().validate(attrs)
+        
 
 
 

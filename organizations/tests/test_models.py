@@ -37,7 +37,7 @@ class TestMembroUnico:
 
         with pytest.raises(IntegrityError):
             OrganizationMember.objects.create(
-                user=seguidor, organization=organization, role=Roles.GERENTE
+                user=seguidor, organization=organization, role=Roles.MANAGER
             )
 
     def test_soft_delete_libera_nova_membership(self, seguidor, organization):
@@ -47,10 +47,10 @@ class TestMembroUnico:
         membro.delete()
 
         novo = OrganizationMember.objects.create(
-            user=seguidor, organization=organization, role=Roles.GERENTE
+            user=seguidor, organization=organization, role=Roles.MANAGER
         )
 
-        assert novo.role == Roles.GERENTE
+        assert novo.role == Roles.MANAGER
 
 
 class TestInvitePendenteUnico:

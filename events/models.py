@@ -5,7 +5,7 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from .validators import validate_slug
 
 class EventStatus(models.TextChoices):
-        DRAFT = 'draft', 'Draft'
+        DRAFT = 'draft', 'Rascunho'
         PUBLISHED = 'published', 'Publicado'
         FINISHED = 'finished','Finalizado'
         CANCELED = 'canceled', 'Cancelado'

@@ -2,10 +2,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import OrganizationFollowSerializer,OrganizationPerfilSerializer
-from .models import OrganizationFollow, Organization
-from rest_framework import generics
-from django.db import IntegrityError
+from .serializers import OrganizationFollowSerializer,OrganizationPerfilSerializer,OrganizationEditProfileSerializer, OrganizationCreateSerializer
+from .models import OrganizationFollow, Organization, OrganizationMember, Roles
+from rest_framework import generics,serializers
+from django.db import IntegrityError, transaction
+from .permissions import IsManager
 
 class FollowOrganizationView(generics.GenericAPIView):
     serializer_class = OrganizationFollowSerializer 
@@ -51,6 +52,30 @@ class OrganizationProfile(generics.RetrieveAPIView):
     serializer_class = OrganizationPerfilSerializer
     permission_classes = [AllowAny]
     queryset = Organization.objects.all()
+    lookup_field = 'slug'          
+    lookup_url_kwarg = 'org_slug'
+
+class CreateOrganizationView(generics.CreateAPIView):
+    serializer_class = OrganizationCreateSerializer
+
+    @transaction.atomic 
+    def perform_create(self, serializer):
+        try:
+            new_organization = serializer.save(owner = self.request.user)
+        except IntegrityError:
+            raise serializers.ValidationError({"organization": "voce ja possui uma organizacao"})
+        
+        OrganizationMember.objects.create(
+            user=self.request.user,
+            organization=new_organization,
+            role=Roles.OWNER) 
+
+
+
+class EditOrganizationProfileView(generics.UpdateAPIView):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationEditProfileSerializer
+    permission_classes = [IsManager]
     lookup_field = 'slug'          
     lookup_url_kwarg = 'org_slug'
 
