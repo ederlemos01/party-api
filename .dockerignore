@@ -1,0 +1,43 @@
+# git
+.git/
+.gitignore
+
+# docker (o build não precisa dos próprios arquivos de infra no contexto)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# claude code
+.claudecodeignore
+
+# docs
+**/*.md
+
+# security
+.env
+
+# python
+venv/
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+
+# ide
+.vscode/
+.idea/
+**/*.swp
+
+# test pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# db
+**/*.sqlite3
+
+# uploads locais (em prod media vive fora da imagem)
+media/

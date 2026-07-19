@@ -1,0 +1,73 @@
+services:
+  db:
+    image: postgres:17
+    container_name: postgres-docker
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      start_period: 30s     
+      start_interval: 2s    
+      interval: 30s         
+      timeout: 5s
+      retries: 5
+    
+
+  django-api:
+    build: .
+    container_name: django-docker
+    command: sh -c  "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_started
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+    env_file:
+     - .env
+    volumes:
+      - .:/app
+
+
+  redis:
+    image: "redis:alpine"
+    container_name: redis-docker
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+
+
+  celery:
+    build: .
+    container_name: celery-docker
+    command: celery -A core worker -l info
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_HOST: db
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+
+
+volumes:
+  postgres_data:
+  redis_data:
+  
