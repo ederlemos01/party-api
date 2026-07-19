@@ -8,7 +8,7 @@ class CreateEventView(generics.CreateAPIView):
     serializer_class = CreateEventSerializer
     
     def perform_create(self, serializer):
-        org= self.request.user.owned_organizations.first()
+        org = self.request.user.owned_organizations.first()
         try:
             serializer.save(organization=org)
         except IntegrityError:

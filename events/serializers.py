@@ -1,18 +1,25 @@
 from rest_framework import serializers
 from .validators import validate_slug
-from .models import Event
+from .models import Event, EventStatus
 
 class CreateEventSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(min_length = 2,validators=[validate_slug],)
+    
     class Meta():
         model = Event
-        fields = ['id','title','description','banner','start_at','end_at','location','slug','organization']
+        fields = ['id','title','description','banner','start_at','end_at','location','slug','organization','status']
         read_only_fields = ['id','organization']
     
+    def validate_status(self, value):
+        if value not in [EventStatus.DRAFT, EventStatus.PUBLISHED]:
+            raise serializers.ValidationError(
+                "esse nao eh um statu valido para a criacao"
+            )
+        return value
+        
     def validate(self, attrs):
         start_at = attrs.get('start_at')
         end_at = attrs.get('end_at')
-
         if start_at and end_at and start_at >= end_at:
             raise serializers.ValidationError({
                 "end_at": "A data de término deve ser estritamente posterior à data de início."
