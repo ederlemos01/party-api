@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import OrganizationMember,OrganizationFollow,Organization
+from .models import OrganizationMember,OrganizationFollow,Organization,Roles, OrganizationInvite
 from rest_framework.validators import UniqueValidator
 from .validators import validate_slug
 class OrganizationMemberSerializer(serializers.ModelSerializer):
@@ -9,13 +9,27 @@ class OrganizationMemberSerializer(serializers.ModelSerializer):
         fields = ['user','role']
         read_only_fields = ['user','role']
 
-
-class OrganizationFollowSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
+class EditOrganizationMemberSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrganizationFollow
-        fields = ['user']
+        model = OrganizationMember
+        fields = ['id', 'role', 'user']
+        read_only_fields = ['id', 'user']
+
+    def validate_role(self, value):
+
+        if value == Roles.OWNER:
+            raise serializers.ValidationError("Apenas o sistema pode gerar esse cargo.")
+        return value
+    
+
+class OutputInviteOrganizationMemberSerializer(serializers.ModelSerializer):
+    invited_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = OrganizationInvite
+        fields = ['id', 'invited_by', 'user','organization', 'role']
+        read_only_fields = ['id','organization','user','role','invited_by']
 
 
 class OrganizationEditProfileSerializer(serializers.ModelSerializer):
@@ -60,6 +74,18 @@ class OrganizationCreateSerializer(serializers.ModelSerializer):
             })
         
         return super().validate(attrs)
+    
+
+class InviteMemberInputSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    class Meta:
+        model = OrganizationInvite
+        fields = ['role','email']
+
+    def validate_role(self, value):
+        if value == Roles.OWNER:
+            raise serializers.ValidationError("Apenas o sistema pode gerar esse cargo.")
+        return value
         
 
 

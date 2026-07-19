@@ -1,4 +1,5 @@
 import pytest
+from django.db import IntegrityError
 from django.urls import reverse
 from rest_framework import status
 
@@ -32,10 +33,12 @@ class TestSeguir:
             user=seguidor, organization=organization
         ).exists()
 
-    def test_seguir_duas_vezes_retorna_400(self, auth_client, organization, follow):
+    def test_seguir_de_novo_e_idempotente(self, auth_client, organization, follow):
+        """O contrato é idempotente: seguir quem já se segue não é erro
+        (double-click, retry de rede móvel) e não pode duplicar linha."""
         response = auth_client.post(follow_url(organization.slug))
 
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_201_CREATED
         assert OrganizationFollow.all_objects.count() == 1
 
     def test_seguir_org_inexistente_retorna_404(self, auth_client):
@@ -81,16 +84,40 @@ class TestDeixarDeSeguir:
 
 
 class TestReseguir:
-    def test_reseguir_retorna_200_e_restaura_a_mesma_linha(
-        self, auth_client, organization, follow
-    ):
-        """Unfollow + follow de novo não pode criar linha nova: o restore
-        reaproveita a existente (preserva o created_at do primeiro follow)."""
+    def test_reseguir_restaura_a_mesma_linha(self, auth_client, organization, follow):
+        """Unfollow + follow de novo não cria linha nova: o update_or_create
+        revive a existente, preservando o created_at do primeiro follow."""
+        created_at_original = follow.created_at
         auth_client.delete(follow_url(organization.slug))
 
         response = auth_client.post(follow_url(organization.slug))
 
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == status.HTTP_201_CREATED
         assert OrganizationFollow.all_objects.count() == 1
         follow.refresh_from_db()
         assert not follow.is_deleted
+        assert follow.created_at == created_at_original
+
+
+class TestInvarianteDeUnicidade:
+    """A constraint agora é total (sem condition): o banco garante no máximo
+    uma linha por (user, organization), viva OU morta — o invariante que o
+    update_or_create da view assume."""
+
+    def test_banco_rejeita_duplicata_com_linha_viva(
+        self, seguidor, organization, follow
+    ):
+        with pytest.raises(IntegrityError):
+            OrganizationFollow.objects.create(
+                user=seguidor, organization=organization
+            )
+
+    def test_banco_rejeita_duplicata_mesmo_com_linha_morta(
+        self, seguidor, organization, follow
+    ):
+        follow.delete()  # soft delete: a linha continua existindo no banco
+
+        with pytest.raises(IntegrityError):
+            OrganizationFollow.objects.create(
+                user=seguidor, organization=organization
+            )

@@ -7,3 +7,6 @@ class IsManager(BaseRolePermission):
 
 class IsViewer(BaseRolePermission):
     allowed_roles = [Roles.VIEWER, Roles.MANAGER, Roles.OWNER]
+
+class IsOwner(BaseRolePermission):
+    allowed_roles = [Roles.OWNER]

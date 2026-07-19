@@ -1,50 +1,27 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-from .serializers import OrganizationFollowSerializer,OrganizationPerfilSerializer,OrganizationEditProfileSerializer, OrganizationCreateSerializer
-from .models import OrganizationFollow, Organization, OrganizationMember, Roles
+from rest_framework import status, exceptions
+from .serializers import OrganizationPerfilSerializer,OrganizationEditProfileSerializer, OrganizationCreateSerializer,OrganizationMemberSerializer, EditOrganizationMemberSerializer, InviteMemberInputSerializer, OutputInviteOrganizationMemberSerializer
+from .models import OrganizationFollow, Organization, OrganizationMember, Roles,  OrganizationInvite
 from rest_framework import generics,serializers
 from django.db import IntegrityError, transaction
-from .permissions import IsManager
+from .permissions import IsManager, IsOwner
+from django.contrib.auth import get_user_model
+from .services import invite_member
+authuser = get_user_model()
 
 class FollowOrganizationView(generics.GenericAPIView):
-    serializer_class = OrganizationFollowSerializer 
     queryset = Organization.objects.all()
     def post(self, request,org_slug,format=None):
-        organization = get_object_or_404(self.get_queryset(), slug=org_slug)
-        if OrganizationFollow.objects.filter(user=request.user, organization=organization).exists():
-            return Response(
-                {"detail": "Você já segue esta organização."}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        try: 
-            my_follow = OrganizationFollow.all_objects.dead().get(
-                user=request.user, 
-                organization=organization
-            )
-            my_follow.restore()
-            serializer = OrganizationFollowSerializer(my_follow)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-            
-        except OrganizationFollow.DoesNotExist:
-            serializer = OrganizationFollowSerializer(data=request.data, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            try:
-                serializer.save(organization = organization)
-            except IntegrityError:
-                return Response(
-                {"detail": "Você já segue esta organização."}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        org = get_object_or_404(self.get_queryset(), slug=org_slug)
+        OrganizationFollow.all_objects.update_or_create(user=request.user, organization=org, defaults={'deleted_at': None})
+        return Response(status=status.HTTP_201_CREATED)
     
     def delete(self,request,org_slug,format=None):
         organization = get_object_or_404(self.get_queryset(), slug=org_slug)
-        
         follow = get_object_or_404(OrganizationFollow, user=request.user, organization=organization)
         follow.delete()
-        
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     
@@ -78,6 +55,65 @@ class EditOrganizationProfileView(generics.UpdateAPIView):
     permission_classes = [IsManager]
     lookup_field = 'slug'          
     lookup_url_kwarg = 'org_slug'
+
+
+class ListOrganizationMembersView(generics.ListAPIView):
+    permission_classes = [IsOwner]
+    serializer_class = OrganizationMemberSerializer
+
+    def get_queryset(self):
+        org_slug = self.kwargs.get('org_slug')
+        return OrganizationMember.objects.filter(organization__slug=org_slug)
+    
+
+class ManageOrganizationMembersView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsOwner]
+    serializer_class = EditOrganizationMemberSerializer
+    
+    def get_queryset(self):
+        org_slug = self.kwargs.get('org_slug')
+        return OrganizationMember.objects.filter(organization__slug=org_slug,organization__deleted_at__isnull=True)
+
+    def perform_update(self, serializer):
+        member = serializer.instance 
+        
+        if member.user == self.request.user:
+            raise exceptions.PermissionDenied("voce nao pode editar seu propio cargo.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.user == self.request.user:
+            raise exceptions.PermissionDenied("voce nao pode deletar seu propio cargo.")
+        instance.delete()
+    
+
+
+
+class InviteOrganizationMemberView(generics.GenericAPIView):
+    permission_classes = [IsOwner]
+    serializer_class = InviteMemberInputSerializer
+    
+    def  post(self,request, org_slug):
+        org = get_object_or_404(Organization, slug=org_slug)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        invite = invite_member(email=serializer.validated_data["email"],invited_by=request.user,
+                    role=serializer.validated_data["role"], org=org)
+   
+        return Response(
+            OutputInviteOrganizationMemberSerializer(invite).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class AcceptOrganizationInviteView(generics.GenericAPIView):
+    
+    def post(self, request, invite_pk):
+        invite = get_object_or_404(OrganizationInvite, id=invite_pk)
+        with transaction.atomic():
+            member = invite.accept(by_user=request.user)
+        return Response(OrganizationMemberSerializer(member).data, status=201)
 
 
 

@@ -4,11 +4,12 @@ class BaseRolePermission(permissions.BasePermission):
     allowed_roles = []
     
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated)
-
-    def has_object_permission(self, request, view, obj):
-        my_org = getattr(obj, 'organization', obj)
-        membership = request.user.org_memberships.filter(organization=my_org).first()
-        if not membership:
+        if not (request.user and request.user.is_authenticated):
             return False
-        return membership.role in self.allowed_roles
+        slug = view.kwargs.get('org_slug')
+        
+        return request.user.org_memberships.filter(
+            organization__slug=slug,
+            role__in=self.allowed_roles,
+        ).exists()
+        

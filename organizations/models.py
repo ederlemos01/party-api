@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from .validators import validate_slug
 import uuid
+from .exceptions import InviteExpired, NotInvitedUser, AlreadyMember,InviteNotPending
 class Roles(models.TextChoices):
     OWNER = "owner", "Dono"
     MANAGER = "manager", "Gerente" 
@@ -57,8 +58,7 @@ class OrganizationFollow(BaseModel):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'organization'],
-                condition=models.Q(deleted_at__isnull=True),
-                name='unique_active_organization_follow',
+                name='unique_organization_follow',
             ),
         ]
 
@@ -114,6 +114,7 @@ class OrganizationInvite(BaseModel):
         PENDING = 'pending', 'Pendente'
         ACCEPTED = 'accepted', 'Aceito'
         REVOKED = 'revoked', 'Cancelado'
+        EXPIRED = 'expired', 'Expirado'
 
     status = models.CharField(max_length=20,choices=StatusChoices.choices,default=StatusChoices.PENDING,)
         
@@ -129,3 +130,29 @@ class OrganizationInvite(BaseModel):
         constraints = [ models.UniqueConstraint(fields=['user', 'organization'],
                                                     condition=models.Q(status='pending') & models.Q(deleted_at__isnull=True),
                                                     name= 'unique_invite_pending')]
+        
+    def delete(self, *args, **kwargs):
+        self.status = OrganizationInvite.StatusChoices.REVOKED
+        self.save(update_fields=['status'])
+        return super().delete(*args, **kwargs)
+    
+    @property
+    def is_expired(self):
+        return self.expires_at < timezone.now()
+    
+    def accept(self, by_user):
+        if self.user_id != by_user.id:
+            raise NotInvitedUser()
+        if self.is_expired:            
+            raise InviteExpired()
+        if self.status != self.StatusChoices.PENDING:
+            raise InviteNotPending()   
+        member, created = OrganizationMember.objects.get_or_create(
+            user=self.user, organization=self.organization,
+            defaults={'role': self.role},
+        )
+        if not created:
+            raise AlreadyMember()
+        self.status = self.StatusChoices.ACCEPTED
+        self.save(update_fields=['status', 'updated_at'])
+        return member
