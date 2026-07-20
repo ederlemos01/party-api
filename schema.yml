@@ -4,6 +4,480 @@ info:
   version: 1.0.0
   description: Sport Clube Corinthians Paulista
 paths:
+  /api/v1/events/:
+    post:
+      operationId: events_create
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEvent'
+          description: ''
+  /api/v1/events/{org}/{event}/:
+    get:
+      operationId: events_retrieve
+      parameters:
+      - in: path
+        name: event
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: org
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventPerfil'
+          description: ''
+  /api/v1/manage/organizations/:
+    post:
+      operationId: manage_organizations_create
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrganizationCreate'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationCreate'
+          description: ''
+  /api/v1/manage/organizations/{org_slug}/:
+    put:
+      operationId: manage_organizations_update
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationEditProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrganizationEditProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrganizationEditProfile'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationEditProfile'
+          description: ''
+    patch:
+      operationId: manage_organizations_partial_update
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationEditProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationEditProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationEditProfile'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationEditProfile'
+          description: ''
+  /api/v1/manage/organizations/{org_slug}/invites/:
+    post:
+      operationId: manage_organizations_invites_create
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteMemberInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InviteMemberInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InviteMemberInput'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutputInviteOrganizationMember'
+          description: ''
+  /api/v1/manage/organizations/{org_slug}/members/:
+    get:
+      operationId: manage_organizations_members_list
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrganizationMemberList'
+          description: ''
+  /api/v1/manage/organizations/{org_slug}/members/{id}/:
+    get:
+      operationId: manage_organizations_members_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditOrganizationMember'
+          description: ''
+    put:
+      operationId: manage_organizations_members_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditOrganizationMember'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EditOrganizationMember'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EditOrganizationMember'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditOrganizationMember'
+          description: ''
+    patch:
+      operationId: manage_organizations_members_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEditOrganizationMember'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEditOrganizationMember'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEditOrganizationMember'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditOrganizationMember'
+          description: ''
+    delete:
+      operationId: manage_organizations_members_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/organizations/{org_slug}/:
+    get:
+      operationId: organizations_retrieve
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationPerfil'
+          description: ''
+  /api/v1/organizations/{org_slug}/followers/:
+    post:
+      operationId: organizations_followers_create
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          description: No response body
+    delete:
+      operationId: organizations_followers_destroy
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/organizations/invites/{invite_pk}/accept/:
+    post:
+      operationId: organizations_invites_accept_create
+      parameters:
+      - in: path
+        name: invite_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationMember'
+          description: ''
+  /api/v1/users/perfil/{id}/:
+    get:
+      operationId: users_perfil_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPerfil'
+          description: ''
+  /api/v1/users/perfil/me/:
+    get:
+      operationId: users_perfil_me_retrieve
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEditPerfil'
+          description: ''
+    put:
+      operationId: users_perfil_me_update
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEditPerfil'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserEditPerfil'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserEditPerfil'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEditPerfil'
+          description: ''
+    patch:
+      operationId: users_perfil_me_partial_update
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserEditPerfil'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserEditPerfil'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserEditPerfil'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserEditPerfil'
+          description: ''
   /api/v1/users/register/:
     post:
       operationId: users_register_create
@@ -113,6 +587,335 @@ paths:
           description: ''
 components:
   schemas:
+    CreateEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 1000
+        banner:
+          type: string
+          format: uri
+          nullable: true
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+        organization:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - end_at
+      - id
+      - location
+      - organization
+      - slug
+      - start_at
+      - title
+    EditOrganizationMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - id
+      - role
+      - user
+    EventPerfil:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        banner:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+        location:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        organization:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - banner
+      - description
+      - end_at
+      - id
+      - location
+      - organization
+      - slug
+      - start_at
+      - title
+    InviteMemberInput:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        email:
+          type: string
+          format: email
+      required:
+      - email
+      - role
+    OrganizationCreate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - id
+      - slug
+    OrganizationEditProfile:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 1000
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        banner:
+          type: string
+          format: uri
+          nullable: true
+        slug:
+          type: string
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - slug
+    OrganizationMember:
+      type: object
+      properties:
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+      required:
+      - role
+      - user
+    OrganizationPerfil:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        banner:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - banner
+      - description
+      - id
+      - name
+      - photo
+      - slug
+    OutputInviteOrganizationMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        organization:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+      required:
+      - id
+      - organization
+      - role
+      - user
+    PaginatedOrganizationMemberList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationMember'
+    PatchedEditOrganizationMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+    PatchedOrganizationEditProfile:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 1000
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        banner:
+          type: string
+          format: uri
+          nullable: true
+        slug:
+          type: string
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+    PatchedUserEditPerfil:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          maxLength: 150
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9_]{3,15}$
+          maxLength: 15
+    RoleEnum:
+      enum:
+      - owner
+      - manager
+      - viewer
+      - checkin
+      - coordenador_checkin
+      type: string
+      description: |-
+        * `owner` - Dono
+        * `manager` - Gerente
+        * `viewer` - Visualizador
+        * `checkin` - Check-in
+        * `coordenador_checkin` - Coordenador de check-in
+    StatusEnum:
+      enum:
+      - draft
+      - published
+      - finished
+      - canceled
+      type: string
+      description: |-
+        * `draft` - Rascunho
+        * `published` - Publicado
+        * `finished` - Finalizado
+        * `canceled` - Cancelado
     TokenObtainPair:
       type: object
       properties:
@@ -153,6 +956,50 @@ components:
           writeOnly: true
       required:
       - token
+    UserEditPerfil:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          maxLength: 150
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9_]{3,15}$
+          maxLength: 15
+      required:
+      - id
+      - username
+    UserPerfil:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        photo:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        bio:
+          type: string
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+      required:
+      - bio
+      - id
+      - photo
+      - username
     UserRegister:
       type: object
       properties:
@@ -173,3 +1020,8 @@ components:
       - email
       - password
       - username
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

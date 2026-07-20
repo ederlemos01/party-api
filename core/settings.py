@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 from decouple import config,Csv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -167,3 +167,10 @@ CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 
 #CORS
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
+
+#jwt
+SIMPLE_JWT = {
+    # TEMPO DE VIDA DOS TOKENS
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Duração do token de acesso (curto)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    }
