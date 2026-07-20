@@ -56,6 +56,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventPerfil'
           description: ''
+  /api/v1/events/home/:
+    get:
+      operationId: events_home_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventListList'
+          description: ''
   /api/v1/manage/organizations/:
     post:
       operationId: manage_organizations_create
@@ -648,6 +670,37 @@ components:
       - id
       - role
       - user
+    EventList:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+        banner:
+          type: string
+          format: uri
+          nullable: true
+        start_at:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 255
+        organization:
+          allOf:
+          - $ref: '#/components/schemas/OrganizationSummary'
+          readOnly: true
+      required:
+      - location
+      - organization
+      - slug
+      - start_at
+      - title
     EventPerfil:
       type: object
       properties:
@@ -791,6 +844,21 @@ components:
       - name
       - photo
       - slug
+    OrganizationSummary:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        slug:
+          type: string
+          maxLength: 50
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+        photo:
+          type: string
+          format: uri
+          nullable: true
     OutputInviteOrganizationMember:
       type: object
       properties:
@@ -815,6 +883,29 @@ components:
       - organization
       - role
       - user
+    PaginatedEventListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventList'
     PaginatedOrganizationMemberList:
       type: object
       required:
