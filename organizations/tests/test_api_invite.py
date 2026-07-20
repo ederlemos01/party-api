@@ -135,8 +135,10 @@ class TestConvidar:
 
     def test_convidar_dispara_email(
         self, owner_client, organization, convidado,
-        django_capture_on_commit_callbacks,
+        django_capture_on_commit_callbacks,settings
     ):
+        settings.CELERY_TASK_ALWAYS_EAGER = True
+        settings.CELERY_TASK_EAGER_PROPAGATES = True
         """O e-mail é registrado via transaction.on_commit, então só dispara
         quando o callback é executado (execute=True)."""
         with django_capture_on_commit_callbacks(execute=True):
