@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .validators import validate_slug
 from .models import Event, EventStatus
+from organizations.models import Organization
 
 class CreateEventSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(min_length = 2,validators=[validate_slug],)
@@ -55,3 +56,18 @@ class EventPerfilSerializer(serializers.ModelSerializer):
         model = Event
         fields = ['id','title','description','banner','start_at','end_at','location','slug','organization']
         read_only_fields = ['id','title','description','banner','start_at','end_at','location','slug','organization']
+
+
+
+class OrganizationSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ['name', 'slug', 'photo']
+
+
+class EventListSerializer(serializers.ModelSerializer):
+    organization = OrganizationSummarySerializer(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = ['title', 'slug', 'banner', 'start_at', 'location', 'organization']
