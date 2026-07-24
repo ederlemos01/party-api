@@ -7,27 +7,19 @@ from django.utils import timezone
 
 class CreateEventView(generics.CreateAPIView):
     serializer_class = CreateEventSerializer
-    
-    def perform_create(self, serializer):
-        org = self.request.user.owned_organizations.first()
-        try:
-            serializer.save(organization=org)
-        except IntegrityError:
-            raise serializers.ValidationError({"slug": "ja existe evento com esse slug na organizacao"})
         
-
-
 
 class EventPerfilView(generics.RetrieveAPIView):
     serializer_class = EventPerfilSerializer
     permission_classes = [AllowAny]
     lookup_field = 'slug'
-    lookup_url_kwarg = 'event'
+    lookup_url_kwarg = 'event_slug'
     
     def get_queryset(self):
-        return Event.objects.filter(organization__slug = self.kwargs['org'],
+        return Event.objects.filter(organization__slug = self.kwargs['org_slug'],
                                      organization__deleted_at__isnull = True,
                                      status=EventStatus.PUBLISHED)
+
     
 class EventListView(generics.ListAPIView):
     serializer_class = EventListSerializer

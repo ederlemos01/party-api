@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status, exceptions
 from .serializers import OrganizationPerfilSerializer,OrganizationEditProfileSerializer, OrganizationCreateSerializer,OrganizationMemberSerializer, EditOrganizationMemberSerializer, InviteMemberInputSerializer, OutputInviteOrganizationMemberSerializer
-from .models import OrganizationFollow, Organization, OrganizationMember, Roles,  OrganizationInvite
+from .models import OrganizationFollow, Organization, OrganizationMember, OrganizationRoles,  OrganizationInvite
 from rest_framework import generics,serializers
 from django.db import IntegrityError, transaction
 from .permissions import IsManager, IsOwner
@@ -49,7 +49,7 @@ class CreateOrganizationView(generics.CreateAPIView):
         OrganizationMember.objects.create(
             user=self.request.user,
             organization=new_organization,
-            role=Roles.OWNER) 
+            role=OrganizationRoles.OWNER) 
 
 
 

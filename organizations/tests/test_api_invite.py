@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 
-from organizations.models import OrganizationInvite, OrganizationMember, Roles
+from organizations.models import OrganizationInvite, OrganizationMember, OrganizationRoles
 
 pytestmark = pytest.mark.django_db
 
@@ -27,7 +27,7 @@ def owner_member(owner, organization):
     OrganizationMember(role=OWNER) de verdade (no fluxo real quem cria é o
     CreateOrganizationView)."""
     return OrganizationMember.objects.create(
-        user=owner, organization=organization, role=Roles.OWNER,
+        user=owner, organization=organization, role=OrganizationRoles.OWNER,
     )
 
 
@@ -52,7 +52,7 @@ def convidado_client(api_client, convidado):
 def convite(owner, organization, convidado):
     return OrganizationInvite.objects.create(
         organization=organization, user=convidado,
-        invited_by=owner, role=Roles.CHECKIN,
+        invited_by=owner, role=OrganizationRoles.VIEWER,
     )
 
 
@@ -64,7 +64,7 @@ class TestConvidarAutorizacao:
     def test_anonimo_retorna_401(self, api_client, organization, convidado):
         response = api_client.post(
             invite_url(organization.slug),
-            {'email': convidado.email, 'role': Roles.CHECKIN.value},
+            {'email': convidado.email, 'role': OrganizationRoles.VIEWER.value},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -73,7 +73,7 @@ class TestConvidarAutorizacao:
         """auth_client está autenticado como 'seguidor', que não é membro."""
         response = auth_client.post(
             invite_url(organization.slug),
-            {'email': convidado.email, 'role': Roles.CHECKIN.value},
+            {'email': convidado.email, 'role': OrganizationRoles.VIEWER.value},
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -85,7 +85,7 @@ class TestConvidar:
     ):
         response = owner_client.post(
             invite_url(organization.slug),
-            {'email': convidado.email, 'role': Roles.CHECKIN.value},
+            {'email': convidado.email, 'role': OrganizationRoles.VIEWER.value},
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -94,24 +94,24 @@ class TestConvidar:
         )
         assert invite.status == OrganizationInvite.StatusChoices.PENDING
         assert invite.invited_by == owner
-        assert invite.role == Roles.CHECKIN
+        assert invite.role == OrganizationRoles.VIEWER
 
     def test_email_sem_conta_retorna_400(self, owner_client, organization):
         response = owner_client.post(
             invite_url(organization.slug),
-            {'email': 'ninguem@exemplo.com', 'role': Roles.CHECKIN.value},
+            {'email': 'ninguem@exemplo.com', 'role': OrganizationRoles.VIEWER.value},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_ja_membro_retorna_400(self, owner_client, organization, convidado):
         OrganizationMember.objects.create(
-            user=convidado, organization=organization, role=Roles.VIEWER,
+            user=convidado, organization=organization, role=OrganizationRoles.VIEWER,
         )
 
         response = owner_client.post(
             invite_url(organization.slug),
-            {'email': convidado.email, 'role': Roles.CHECKIN.value},
+            {'email': convidado.email, 'role': OrganizationRoles.VIEWER.value},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -123,7 +123,7 @@ class TestConvidar:
         sem violar a unique_invite_pending."""
         response = owner_client.post(
             invite_url(organization.slug),
-            {'email': convidado.email, 'role': Roles.MANAGER.value},
+            {'email': convidado.email, 'role': OrganizationRoles.MANAGER.value},
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -144,7 +144,7 @@ class TestConvidar:
         with django_capture_on_commit_callbacks(execute=True):
             response = owner_client.post(
                 invite_url(organization.slug),
-                {'email': convidado.email, 'role': Roles.CHECKIN.value},
+                {'email': convidado.email, 'role': OrganizationRoles.VIEWER.value},
             )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -182,7 +182,7 @@ class TestAceitarConvite:
     ):
         expirado = OrganizationInvite.objects.create(
             organization=organization, user=convidado, invited_by=owner,
-            role=Roles.CHECKIN, expires_at=timezone.now() - timedelta(days=1),
+            role=OrganizationRoles.VIEWER, expires_at=timezone.now() - timedelta(days=1),
         )
 
         response = convidado_client.post(accept_url(expirado.id))
@@ -206,7 +206,7 @@ class TestAceitarConvite:
         """Convite pendente, porém o usuário já é membro por outro caminho:
         o get_or_create do accept() devolve created=False -> AlreadyMember."""
         OrganizationMember.objects.create(
-            user=convidado, organization=organization, role=Roles.VIEWER,
+            user=convidado, organization=organization, role=OrganizationRoles.VIEWER,
         )
 
         response = convidado_client.post(accept_url(convite.id))

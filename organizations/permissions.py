@@ -1,12 +1,12 @@
 
-from common.permissions import BaseRolePermission
-from .models import Roles
+from common.permissions import BaseOrganizationRolePermission
+from .models import OrganizationRoles
 
-class IsManager(BaseRolePermission):
-    allowed_roles = [Roles.MANAGER, Roles.OWNER]
+class IsManager(BaseOrganizationRolePermission):
+    allowed_roles = [OrganizationRoles.MANAGER, OrganizationRoles.OWNER]
 
-class IsViewer(BaseRolePermission):
-    allowed_roles = [Roles.VIEWER, Roles.MANAGER, Roles.OWNER]
+class IsViewer(BaseOrganizationRolePermission):
+    allowed_roles = [OrganizationRoles.VIEWER, OrganizationRoles.MANAGER, OrganizationRoles.OWNER]
 
-class IsOwner(BaseRolePermission):
-    allowed_roles = [Roles.OWNER]
+class IsOwner(BaseOrganizationRolePermission):
+    allowed_roles = [OrganizationRoles.OWNER]

@@ -8,7 +8,7 @@ from organizations.models import (
     Organization,
     OrganizationInvite,
     OrganizationMember,
-    Roles,
+    OrganizationRoles,
 )
 
 pytestmark = pytest.mark.django_db
@@ -32,30 +32,30 @@ class TestDonoUnico:
 class TestMembroUnico:
     def test_membro_duplicado_ativo_falha(self, seguidor, organization):
         OrganizationMember.objects.create(
-            user=seguidor, organization=organization, role=Roles.CHECKIN
+            user=seguidor, organization=organization, role=OrganizationRoles.VIEWER
         )
 
         with pytest.raises(IntegrityError):
             OrganizationMember.objects.create(
-                user=seguidor, organization=organization, role=Roles.MANAGER
+                user=seguidor, organization=organization, role=OrganizationRoles.MANAGER
             )
 
     def test_soft_delete_libera_nova_membership(self, seguidor, organization):
         membro = OrganizationMember.objects.create(
-            user=seguidor, organization=organization, role=Roles.CHECKIN
+            user=seguidor, organization=organization, role=OrganizationRoles.VIEWER
         )
         membro.delete()
 
         novo = OrganizationMember.objects.create(
-            user=seguidor, organization=organization, role=Roles.MANAGER
+            user=seguidor, organization=organization, role=OrganizationRoles.MANAGER
         )
 
-        assert novo.role == Roles.MANAGER
+        assert novo.role == OrganizationRoles.MANAGER
 
 
 class TestInvitePendenteUnico:
     def criar_invite(self, owner, seguidor, organization, **kwargs):
-        kwargs.setdefault('role', Roles.CHECKIN)
+        kwargs.setdefault('role', OrganizationRoles.VIEWER)
         return OrganizationInvite.objects.create(
             invited_by=owner, user=seguidor, organization=organization, **kwargs
         )
@@ -85,7 +85,7 @@ class TestInviteExpiracao:
             invited_by=owner,
             user=seguidor,
             organization=organization,
-            role=Roles.CHECKIN,
+            role=OrganizationRoles.VIEWER,
         )
 
         esperado = timezone.now() + timedelta(days=7)

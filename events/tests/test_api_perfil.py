@@ -8,7 +8,7 @@ pytestmark = pytest.mark.django_db
 
 
 def perfil_url(org_slug, event_slug):
-    return reverse('event-perfil', kwargs={'org': org_slug, 'event': event_slug})
+    return reverse('event-perfil', kwargs={'org_slug': org_slug, 'event_slug': event_slug})
 
 
 class TestPerfilPublicado:

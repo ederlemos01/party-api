@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .validators import validate_slug
 from .models import Event, EventStatus
-from organizations.models import Organization
+from organizations.models import Organization, OrganizationRoles
+
 
 class CreateEventSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(min_length = 2,validators=[validate_slug],)
@@ -9,7 +10,7 @@ class CreateEventSerializer(serializers.ModelSerializer):
     class Meta():
         model = Event
         fields = ['id','title','description','banner','start_at','end_at','location','slug','organization','status']
-        read_only_fields = ['id','organization']
+        read_only_fields = ['id']
     
     def validate_status(self, value):
         if value not in [EventStatus.DRAFT, EventStatus.PUBLISHED]:
@@ -28,13 +29,18 @@ class CreateEventSerializer(serializers.ModelSerializer):
         
         
         request = self.context.get('request')
-    
-        organization = request.user.owned_organizations.first()
+        user = request.user
         
-        if not organization:
-            raise serializers.ValidationError("Você precisa criar uma organização antes de criar eventos.")
-
+        organization = attrs.get('organization')
         slug = attrs.get('slug')
+
+        is_manager = user.org_memberships.filter(organization = organization,role = OrganizationRoles.MANAGER).exists()
+        is_owner = user.owned_organizations.filter(id=organization.id).exists()
+        if not (is_manager or is_owner):
+            raise serializers.ValidationError({
+                                "organization": "voce nao tem permissao para criar evento nessa organizacao"
+                            })
+
         
         if organization and slug:
             slug_is_taken = Event.objects.filter(

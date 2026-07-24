@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import OrganizationMember,OrganizationFollow,Organization,Roles, OrganizationInvite
+from .models import OrganizationMember,Organization,OrganizationRoles, OrganizationInvite
 from rest_framework.validators import UniqueValidator
 from .validators import validate_slug
 class OrganizationMemberSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class EditOrganizationMemberSerializer(serializers.ModelSerializer):
 
     def validate_role(self, value):
 
-        if value == Roles.OWNER:
+        if value == OrganizationRoles.OWNER:
             raise serializers.ValidationError("Apenas o sistema pode gerar esse cargo.")
         return value
     
@@ -83,7 +83,7 @@ class InviteMemberInputSerializer(serializers.ModelSerializer):
         fields = ['role','email']
 
     def validate_role(self, value):
-        if value == Roles.OWNER:
+        if value == OrganizationRoles.OWNER:
             raise serializers.ValidationError("Apenas o sistema pode gerar esse cargo.")
         return value
         

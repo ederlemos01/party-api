@@ -7,12 +7,11 @@ from django.core.validators import MinLengthValidator, MaxLengthValidator
 from .validators import validate_slug
 import uuid
 from .exceptions import InviteExpired, NotInvitedUser, AlreadyMember,InviteNotPending
-class Roles(models.TextChoices):
+class OrganizationRoles(models.TextChoices):
     OWNER = "owner", "Dono"
     MANAGER = "manager", "Gerente" 
     VIEWER = "viewer", "Visualizador"
-    CHECKIN = "checkin", "Check-in"
-    COORDENADOR_CHECKIN = "coordenador_checkin", "Coordenador de check-in"
+    CHECKIN_COORDINATOR = "checkin_coordinator", "Coordenador de check-in"
 
 class Organization(BaseModel):
     name = models.CharField(blank=True,max_length=100)
@@ -78,7 +77,7 @@ class OrganizationMember(BaseModel):
     )
 
 
-    role = models.CharField(max_length=32, choices=Roles.choices)
+    role = models.CharField(max_length=32, choices=OrganizationRoles.choices)
 
     class Meta(BaseModel.Meta):
         constraints = [
@@ -107,7 +106,7 @@ class OrganizationInvite(BaseModel):
                                    editable=False,)
     organization = models.ForeignKey(Organization,editable=False,
                                      on_delete=models.CASCADE,related_name='invites',)
-    role = models.CharField(max_length=32, choices=Roles.choices)
+    role = models.CharField(max_length=32, choices=OrganizationRoles.choices)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='received_invites',)
     
     class StatusChoices(models.TextChoices):
