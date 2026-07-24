@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from events.models import Event, EventStatus
-from organizations.models import Organization
+from organizations.models import Organization, OrganizationMember, OrganizationRoles
 from users.models import User
 
 
@@ -88,9 +88,26 @@ def owner_client(api_client, owner):
 
 
 @pytest.fixture
-def payload_evento():
+def gerente(criar_usuario, organization):
+    """Usuário com papel MANAGER na organization, mas que NÃO é o dono.
+    Cobre o caminho is_manager da CreateEventSerializer."""
+    user = criar_usuario(email='gerente@exemplo.com', username='gerente')
+    OrganizationMember.objects.create(
+        user=user, organization=organization, role=OrganizationRoles.MANAGER,
+    )
+    return user
+
+
+@pytest.fixture
+def gerente_client(api_client, gerente):
+    api_client.force_authenticate(user=gerente)
+    return api_client
+
+
+@pytest.fixture
+def payload_evento(organization):
     """Payload válido para o POST de criação; cada teste altera só o campo
-    em jogo."""
+    em jogo. A organization é obrigatória no corpo (o `owner` é dono dela)."""
     inicio = timezone.now() + timedelta(days=7)
     return {
         'title': 'Festa de Lançamento',
@@ -99,4 +116,5 @@ def payload_evento():
         'end_at': inicio + timedelta(hours=4),
         'location': 'Galpão 13, São Paulo',
         'slug': 'festa-lancamento',
+        'organization': organization.id,
     }

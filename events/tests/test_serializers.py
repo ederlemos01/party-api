@@ -34,23 +34,28 @@ class TestDatas:
         assert 'end_at' in serializer.errors
 
 
-class TestOrganizacaoDoUsuario:
-    def test_usuario_sem_org_invalido(self, owner, payload_evento):
-        """Sem a fixture organization, o dono não tem nenhuma org ativa."""
+class TestPermissaoOrganizacao:
+    def test_usuario_sem_papel_na_org_invalido(
+        self, owner, outra_organization, payload_evento
+    ):
+        """owner não é dono nem gerente de `outra_organization`: a validação
+        de permissão aponta o erro na chave organization."""
+        payload_evento['organization'] = outra_organization.id
+
         serializer = serializer_para(owner, payload_evento)
 
         assert not serializer.is_valid()
-        assert 'non_field_errors' in serializer.errors
+        assert 'organization' in serializer.errors
 
     def test_org_soft_deletada_nao_conta(self, owner, organization, payload_evento):
-        """owned_organizations usa o manager de vivas: org soft-deletada não
-        habilita o dono a criar eventos."""
+        """Org soft-deletada não é referenciável (o queryset do campo usa o
+        manager de vivas), então o payload nem chega na checagem de papel."""
         organization.delete()
 
         serializer = serializer_para(owner, payload_evento)
 
         assert not serializer.is_valid()
-        assert 'non_field_errors' in serializer.errors
+        assert 'organization' in serializer.errors
 
 
 class TestSlugDisponibilidade:

@@ -31,15 +31,29 @@ class TestCriacaoSucesso:
         assert evento.organization == organization
         assert evento.status == EventStatus.DRAFT
 
+    def test_gerente_da_org_cria_evento_201(
+        self, gerente_client, organization, payload_evento
+    ):
+        """Gerente (papel MANAGER, não-dono) também pode criar eventos na org."""
+        response = gerente_client.post(create_url(), payload_evento, format='json')
 
-class TestCriacaoSemOrg:
-    def test_autenticado_sem_org_retorna_400(self, owner_client, payload_evento):
-        """Sem a fixture organization, o usuário autenticado não é dono de
-        nenhuma org ativa."""
+        assert response.status_code == status.HTTP_201_CREATED
+        evento = Event.objects.get(slug='festa-lancamento')
+        assert evento.organization == organization
+
+
+class TestCriacaoAutorizacao:
+    def test_usuario_sem_papel_na_org_retorna_400(
+        self, owner_client, outra_organization, payload_evento
+    ):
+        """owner_client é dono da `organization`, mas não tem papel nenhum em
+        `outra_organization` — não pode criar evento lá."""
+        payload_evento['organization'] = outra_organization.id
+
         response = owner_client.post(create_url(), payload_evento, format='json')
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert 'non_field_errors' in response.data
+        assert 'organization' in response.data
 
 
 class TestCriacaoPayloadInvalido:
