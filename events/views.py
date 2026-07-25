@@ -6,7 +6,7 @@ from django.utils import timezone
 from organizations.permissions import IsOwner, IsOrganizationManager
 from django.db import transaction, IntegrityError
 from rest_framework import serializers
-from .permissions import IsEventManager, IsEventViewer
+from .permissions import IsEventManager
 
 
 class CreateEventView(generics.CreateAPIView):
