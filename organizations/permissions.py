@@ -2,10 +2,10 @@
 from common.permissions import BaseOrganizationRolePermission
 from .models import OrganizationRoles
 
-class IsManager(BaseOrganizationRolePermission):
+class IsOrganizationManager(BaseOrganizationRolePermission):
     allowed_roles = [OrganizationRoles.MANAGER, OrganizationRoles.OWNER]
 
-class IsViewer(BaseOrganizationRolePermission):
+class IsOrganizationViewer(BaseOrganizationRolePermission):
     allowed_roles = [OrganizationRoles.VIEWER, OrganizationRoles.MANAGER, OrganizationRoles.OWNER]
 
 class IsOwner(BaseOrganizationRolePermission):

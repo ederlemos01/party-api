@@ -6,7 +6,7 @@ from .serializers import OrganizationPerfilSerializer,OrganizationEditProfileSer
 from .models import OrganizationFollow, Organization, OrganizationMember, OrganizationRoles,  OrganizationInvite
 from rest_framework import generics,serializers
 from django.db import IntegrityError, transaction
-from .permissions import IsManager, IsOwner
+from .permissions import *
 from drf_spectacular.utils import extend_schema
 from django.contrib.auth import get_user_model
 from .services import invite_member
@@ -56,7 +56,7 @@ class CreateOrganizationView(generics.CreateAPIView):
 class EditOrganizationProfileView(generics.UpdateAPIView):
     queryset = Organization.objects.all()
     serializer_class = OrganizationEditProfileSerializer
-    permission_classes = [IsManager]
+    permission_classes = [IsOrganizationManager]
     lookup_field = 'slug'          
     lookup_url_kwarg = 'org_slug'
 

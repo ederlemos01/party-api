@@ -1,12 +1,24 @@
-from rest_framework import generics, serializers
+from rest_framework import generics
 from .serializers import CreateEventSerializer, EventPerfilSerializer, EventListSerializer
 from rest_framework.permissions import AllowAny
-from .models import Event, EventStatus
-from django.db import IntegrityError
+from .models import Event, EventStatus, EventMember, EventRoles
 from django.utils import timezone
-
+from organizations.permissions import IsOwner, IsOrganizationManager
+from django.db import transaction, IntegrityError
+from rest_framework import serializers
 class CreateEventView(generics.CreateAPIView):
     serializer_class = CreateEventSerializer
+    permission_classes = [IsOwner |IsOrganizationManager]
+
+    
+    def perform_create(self, serializer):
+        try:
+            with transaction.atomic():
+                event = serializer.save()
+                EventMember.objects.create(user=self.request.user,event=event,role=EventRoles.MANAGER )
+        except IntegrityError:
+            raise serializers.ValidationError({"slug": "já existe um evento com esse slug nessa organização"})
+
         
 
 class EventPerfilView(generics.RetrieveAPIView):
