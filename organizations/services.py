@@ -1,7 +1,7 @@
 from .models import OrganizationInvite, OrganizationMember
 from .tasks import send_invite_email
 from django.db import transaction, IntegrityError
-from .exceptions import UserHasNoAccount, InviteAlreadyExists, AlreadyMember
+from common.exceptions import UserHasNoAccount, InviteAlreadyExists, AlreadyOrganizationMember
 from django.contrib.auth import get_user_model
 authuser = get_user_model()
 
@@ -13,7 +13,7 @@ def invite_member(*, org, email, role, invited_by):
         raise UserHasNoAccount()       
     
     if OrganizationMember.objects.filter(organization=org, user=user).exists():
-        raise AlreadyMember()
+        raise AlreadyOrganizationMember()
     
     last_invite = OrganizationInvite.objects.filter(organization=org, user=user).first()
     if last_invite:

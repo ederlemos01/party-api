@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from .validators import validate_slug
 import uuid
-from .exceptions import InviteExpired, NotInvitedUser, AlreadyMember,InviteNotPending
+from common.exceptions import InviteExpired, NotInvitedUser, AlreadyOrganizationMember,InviteNotPending
 class OrganizationRoles(models.TextChoices):
     OWNER = "owner", "Dono"
     MANAGER = "manager", "Gerente" 
@@ -151,7 +151,7 @@ class OrganizationInvite(BaseModel):
             defaults={'role': self.role},
         )
         if not created:
-            raise AlreadyMember()
+            raise AlreadyOrganizationMember()
         self.status = self.StatusChoices.ACCEPTED
         self.save(update_fields=['status', 'updated_at'])
         return member

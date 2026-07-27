@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .validators import validate_slug
-from .models import Event, EventStatus
+from .models import Event, EventStatus,EventMember,EventInvite
 from organizations.models import Organization
 from django.shortcuts import get_object_or_404
 from .services import validate_event
@@ -73,3 +73,26 @@ class EditEventSerializer(serializers.ModelSerializer):
         validate_event(start_at=start_at,end_at=end_at,organization=organization,slug=slug, instance=self.instance)
 
         return super().validate(attrs)
+
+
+class EventMemberSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = EventMember
+        fields = ['user','role']
+        read_only_fields = ['user','role']
+
+
+class InviteMemberInputSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    class Meta:
+        model = EventInvite
+        fields = ['role','email']
+
+
+class InviteMemberOutputSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EventInvite
+        fields = ['id', 'invited_by', 'user','event', 'role']
+        read_only_fields = ['id','event','user','role','invited_by']

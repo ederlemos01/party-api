@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Event, EventMember
+from .models import Event, EventMember,EventInvite
 
 
 @admin.register(Event)
@@ -15,4 +15,21 @@ class EventMemberAdmin(admin.ModelAdmin):
     list_display = ('user', 'event', 'role', 'created_at')
     search_fields = ('user__username', 'user__email', 'event__title')
     list_filter = ('role',)
+    readonly_fields = ('created_at', 'updated_at', 'deleted_at')
+
+
+@admin.register(EventInvite)
+class EventInviteAdmin(admin.ModelAdmin):
+
+    list_display = ('user', 'event', 'role', 'status', 'invited_by', 'expires_at')
+    
+
+    search_fields = (
+        'user__username', 
+        'user__email', 
+        'event__title', 
+        'invited_by__username', 
+        'invited_by__email'
+    )
+    list_filter = ('status', 'role')
     readonly_fields = ('created_at', 'updated_at', 'deleted_at')

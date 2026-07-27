@@ -14,9 +14,13 @@ class InviteNotPending(APIException):
     default_detail = "o convite nao esta pendente"
 
 
-class AlreadyMember(APIException):
+class AlreadyOrganizationMember(APIException):
     status_code = 400
     default_detail = "voce ja e membro da organizacao"
+
+class AlreadyEventMember(APIException):
+    status_code = 400
+    default_detail = "voce ja e membro do evento"
 
 class UserHasNoAccount(APIException):
     status_code = 400
