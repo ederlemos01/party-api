@@ -10,15 +10,18 @@ class TicketType(BaseModel):
     title = models.CharField(max_length=120)
     description = models.CharField(blank=True,max_length=300)
     price = models.DecimalField(max_digits=6, decimal_places=2, default=0, validators=[
-         MinValueValidator(Decimal('0.00'))])
+         MinValueValidator(Decimal('0.00'))
+         ])
     quantity = models.PositiveSmallIntegerField(validators=[
             MinValueValidator(1),   
             MaxValueValidator(30000)  
         ])
     quantity_reserved = models.PositiveSmallIntegerField(default=0,validators=[
-                MaxValueValidator(30000)  
+            MinValueValidator(0),  
+            MaxValueValidator(30000)  
             ])
     quantity_sold = models.PositiveSmallIntegerField(default=0,validators=[
+            MinValueValidator(0),
             MaxValueValidator(30000)  
         ])
     min_quantity_per_order =  models.PositiveSmallIntegerField(validators=[
@@ -39,7 +42,7 @@ class TicketType(BaseModel):
 
     @property
     def is_free(self):
-         return self.price == 0
+         return self.price == Decimal('0.00')
 
     class Meta(BaseModel.Meta):
         constraints = [
@@ -49,10 +52,9 @@ class TicketType(BaseModel):
                                             name='max_order_quantity_gte_min'),
                     models.CheckConstraint(condition=models.Q(quantity__gte=models.F('quantity_sold')), 
                                             name='quantity_gte_quantity_sold'),
-                    models.CheckConstraint(price__gte=0),
-                    models.CheckConstraint(condition=models.Q(quantity_gte=models.F('max_quantity_per_user')),
+                    models.CheckConstraint(condition=models.Q(quantity__gte=models.F('max_quantity_per_user')),
                                            name='quantity_gte_max_quantity_per_user'),
-                    models.CheckConstraint(condition=models.Q(quantity_gte=models.F('max_quantity_per_order')),
+                    models.CheckConstraint(condition=models.Q(quantity__gte=models.F('max_quantity_per_order')),
                                            name='quantity_gte_max_quantity_per_order')]
 
     def __str__(self):
