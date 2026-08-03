@@ -6,7 +6,6 @@ from rest_framework.permissions import AllowAny
 from .models import TicketType
 from events.models import Event
 from django.shortcuts import get_object_or_404
-from django.db import transaction
 
 class CreateTicketTypeView(generics.CreateAPIView):
     serializer_class = CreateTicketTypeSerializer
