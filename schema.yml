@@ -4,43 +4,44 @@ info:
   version: 1.0.0
   description: Sport Clube Corinthians Paulista
 paths:
-  /api/v1/events/:
-    post:
-      operationId: events_create
-      tags:
-      - events
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateEvent'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CreateEvent'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/CreateEvent'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateEvent'
-          description: ''
-  /api/v1/events/{org}/{event}/:
+  /api/v1/events/{event_slug}/tickets/{ticket_id}/:
     get:
-      operationId: events_retrieve
+      operationId: events_tickets_retrieve
       parameters:
       - in: path
-        name: event
+        name: event_slug
         schema:
           type: string
         required: true
       - in: path
-        name: org
+        name: ticket_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveTicketType'
+          description: ''
+  /api/v1/events/{org_slug}/{event_slug}/:
+    get:
+      operationId: events_retrieve
+      parameters:
+      - in: path
+        name: event_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: org_slug
         schema:
           type: string
         required: true
@@ -77,6 +78,205 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedEventListList'
+          description: ''
+  /api/v1/events/invites/{invite_pk}/accept/:
+    post:
+      operationId: events_invites_accept_create
+      parameters:
+      - in: path
+        name: invite_pk
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventMember'
+          description: ''
+  /api/v1/manage/{org_slug}/{event_slug}/tickets/:
+    post:
+      operationId: manage_tickets_create
+      parameters:
+      - in: path
+        name: event_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTicketType'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateTicketType'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateTicketType'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTicketType'
+          description: ''
+  /api/v1/manage/{org_slug}/events/:
+    post:
+      operationId: manage_events_create
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateEvent'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateEvent'
+          description: ''
+  /api/v1/manage/{org_slug}/events/{event_slug}/:
+    put:
+      operationId: manage_events_update
+      parameters:
+      - in: path
+        name: event_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EditEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EditEvent'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditEvent'
+          description: ''
+    patch:
+      operationId: manage_events_partial_update
+      parameters:
+      - in: path
+        name: event_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEditEvent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEditEvent'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEditEvent'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditEvent'
+          description: ''
+  /api/v1/manage/{org_slug}/events/{event_slug}/invites/:
+    post:
+      operationId: manage_events_invites_create
+      parameters:
+      - in: path
+        name: event_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteMemberInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InviteMemberInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InviteMemberInput'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteMemberOutput'
           description: ''
   /api/v1/manage/organizations/:
     post:
@@ -644,12 +844,109 @@ components:
           format: uuid
           readOnly: true
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
       required:
       - end_at
       - id
       - location
       - organization
+      - slug
+      - start_at
+      - status
+      - title
+    CreateTicketType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        event:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 300
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+        quantity:
+          type: integer
+          maximum: 30000
+          minimum: 1
+        min_quantity_per_order:
+          type: integer
+          maximum: 100
+          minimum: 1
+        max_quantity_per_order:
+          type: integer
+          maximum: 100
+          minimum: 1
+        max_quantity_per_user:
+          type: integer
+          maximum: 100
+          minimum: 1
+        sales_start_at:
+          type: string
+          format: date-time
+        sales_end_at:
+          type: string
+          format: date-time
+        absorb_fee:
+          type: boolean
+      required:
+      - event
+      - id
+      - max_quantity_per_order
+      - max_quantity_per_user
+      - min_quantity_per_order
+      - quantity
+      - sales_end_at
+      - sales_start_at
+      - title
+    EditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 1000
+        banner:
+          type: string
+          format: uri
+          nullable: true
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - end_at
+      - id
+      - location
       - slug
       - start_at
       - title
@@ -661,7 +958,7 @@ components:
           format: uuid
           readOnly: true
         role:
-          $ref: '#/components/schemas/RoleEnum'
+          $ref: '#/components/schemas/Role84fEnum'
         user:
           type: string
           format: uuid
@@ -701,6 +998,20 @@ components:
       - slug
       - start_at
       - title
+    EventMember:
+      type: object
+      properties:
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/Role455Enum'
+          readOnly: true
+      required:
+      - role
+      - user
     EventPerfil:
       type: object
       properties:
@@ -752,13 +1063,42 @@ components:
       type: object
       properties:
         role:
-          $ref: '#/components/schemas/RoleEnum'
+          $ref: '#/components/schemas/Role455Enum'
         email:
           type: string
           format: email
       required:
       - email
       - role
+    InviteMemberOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        invited_by:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        event:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/Role455Enum'
+          readOnly: true
+      required:
+      - event
+      - id
+      - invited_by
+      - role
+      - user
     OrganizationCreate:
       type: object
       properties:
@@ -805,7 +1145,7 @@ components:
           readOnly: true
         role:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/Role84fEnum'
           readOnly: true
       required:
       - role
@@ -876,7 +1216,7 @@ components:
           readOnly: true
         role:
           allOf:
-          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/Role84fEnum'
           readOnly: true
       required:
       - id
@@ -929,6 +1269,38 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrganizationMember'
+    PatchedEditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 1000
+        banner:
+          type: string
+          format: uri
+          nullable: true
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        location:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          minLength: 2
+          pattern: ^[-a-zA-Z0-9_]+$
+        status:
+          $ref: '#/components/schemas/StatusEnum'
     PatchedEditOrganizationMember:
       type: object
       properties:
@@ -937,7 +1309,7 @@ components:
           format: uuid
           readOnly: true
         role:
-          $ref: '#/components/schemas/RoleEnum'
+          $ref: '#/components/schemas/Role84fEnum'
         user:
           type: string
           format: uuid
@@ -981,20 +1353,64 @@ components:
           type: string
           pattern: ^[a-zA-Z0-9_]{3,15}$
           maxLength: 15
-    RoleEnum:
+    RetrieveTicketType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,2})?$
+          readOnly: true
+        sales_end_at:
+          type: string
+          format: date-time
+          readOnly: true
+        min_quantity_per_order:
+          type: integer
+          readOnly: true
+        max_quantity_per_order:
+          type: integer
+          readOnly: true
+      required:
+      - description
+      - id
+      - max_quantity_per_order
+      - min_quantity_per_order
+      - price
+      - sales_end_at
+      - title
+    Role455Enum:
+      enum:
+      - manager
+      - checkin_coordinator
+      - viewer
+      type: string
+      description: |-
+        * `manager` - Gerente
+        * `checkin_coordinator` - Coordenador de check-in
+        * `viewer` - Visualizador
+    Role84fEnum:
       enum:
       - owner
       - manager
       - viewer
-      - checkin
-      - coordenador_checkin
+      - checkin_coordinator
       type: string
       description: |-
         * `owner` - Dono
         * `manager` - Gerente
         * `viewer` - Visualizador
-        * `checkin` - Check-in
-        * `coordenador_checkin` - Coordenador de check-in
+        * `checkin_coordinator` - Coordenador de check-in
     StatusEnum:
       enum:
       - draft
