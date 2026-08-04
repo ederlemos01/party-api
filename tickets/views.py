@@ -22,13 +22,25 @@ class CreateTicketTypeView(generics.CreateAPIView):
         serializer.save(event=event)
         
 
-class ShowTicketTypeView(generics.RetrieveAPIView):
+class RetrieveTicketTypeView(generics.RetrieveAPIView):
     serializer_class = RetrieveTicketTypeSerializer
     permission_classes = [AllowAny]
     queryset = TicketType.objects.all()
     lookup_field = 'uuid'          
     lookup_url_kwarg = 'ticket_id'
 
+class ListTicketTypeView(generics.ListAPIView):
+    serializer_class = RetrieveTicketTypeSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        org_slug = self.kwargs.get('org_slug')
+        event_slug = self.kwargs.get('event_slug')
+
+        return TicketType.objects.filter(
+            event__slug=event_slug,
+            event__organization__slug=org_slug
+        )
 
 
 
