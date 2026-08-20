@@ -6,6 +6,12 @@ from django.shortcuts import get_object_or_404
 from .services import validate_event
 
 
+
+class EventMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ['id', 'title', 'start_at', 'location']
+        
 class CreateEventSerializer(serializers.ModelSerializer):
     slug = serializers.SlugField(min_length = 2,validators=[validate_slug],)
     
