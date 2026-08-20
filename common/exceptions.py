@@ -29,3 +29,7 @@ class UserHasNoAccount(APIException):
 class InviteAlreadyExists(APIException):
     status_code = 400
     default_detail = "o convite ja foi enviado" 
+
+class MPGatewayError(APIException):
+    status_code = 202
+    default_detail = "Falha ao comunicar com o Mercado Pago (rede, timeout, resposta inesperada"
