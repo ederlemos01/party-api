@@ -79,7 +79,6 @@ class TicketStatusChoices(models.TextChoices):
 class Ticket(BaseModel):
     holder = models.ForeignKey(authuser,editable=True, on_delete=models.PROTECT,related_name='tickets')
     ticket_type = models.ForeignKey(TicketType,editable=False,on_delete=models.PROTECT,related_name='tickets')
-    order = models.ForeignKey("orders.Order",editable=False,on_delete=models.PROTECT,related_name='tickets')
     status = models.CharField(max_length=20,choices=TicketStatusChoices.choices,default=TicketStatusChoices.VALID)
     checked_in_at = models.DateTimeField(null=True, blank=True)
     checked_in_by = models.CharField(max_length=100,blank=True)

@@ -15,7 +15,7 @@ urlpatterns = [
     path('api/v1/organizations/', include('organizations.urls') ),
     path('api/v1/manage/organizations/', include('organizations.urls_manage') ),
     
-    path('api/v1/events/<slug:event_slug>/tickets/', include('tickets.urls') ),
+    path('api/v1/tickets/', include('tickets.urls') ),
     path('api/v1/manage/<slug:org_slug>/<slug:event_slug>/tickets/', include('tickets.urls_manage') ),
     
     path('api/v1/events/', include('events.urls') ),

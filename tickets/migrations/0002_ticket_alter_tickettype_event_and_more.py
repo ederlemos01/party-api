@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('events', '0004_eventinvite'),
-        ('orders', '0002_remove_order_checkout_id_order_installments_and_more'),
         ('tickets', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
@@ -53,11 +52,6 @@ class Migration(migrations.Migration):
             model_name='ticket',
             name='holder',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='tickets', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='ticket',
-            name='order',
-            field=models.ForeignKey(editable=False, on_delete=django.db.models.deletion.PROTECT, related_name='tickets', to='orders.order'),
         ),
         migrations.AddField(
             model_name='ticket',
